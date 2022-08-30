@@ -56,12 +56,12 @@ def input_fn(features, batch_size=256):
 
 
 predict_x = {
-    'obfuscated': ["lo_es", 'fl_s']
+    'obfuscated': ["_o_es", 'fl_s']
 }
 
 
 predictions = classifier.predict(
-    input_fn=lambda: input_fn(predict_x), predict_keys='obfuscated')
+    input_fn=lambda: input_fn(predict_x))
 
 
 
