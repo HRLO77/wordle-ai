@@ -8,96 +8,67 @@ import keras
 words = [word.strip() for word in open('./wordle.txt').readlines()]
 word_dict = {v:i for i,v in enumerate(words)}
 
-dat = pk.load(open('./wordle.pickle', 'rb'))
-data = np.array([[i] for i in dat[0]])
-labels = np.array([[i] for i in dat[1]])
-print(labels[0])
 
-test = np.array([["lowe_"], ["lo_es"]])
-
-test_labels = np.array([['lowes'], ['lowes']])
-
+data = pd.read_csv('./wordle.csv')
+labels = np.array([int(i) for i in data.pop('labels').to_numpy()])
+test =pd.read_csv('./test.csv')
+test_labels = np.array([int(i) for i in test.pop('labels').to_numpy()])
+test.head(), data.head()
 char2idx = {v:i for i,v in enumerate(set(' '.join(words)))}
-# print(char2idx)
-idx2char = {v: i for i,v in char2idx.items()}
+idx2char = {v:i for i,v in char2idx.items()}
 
-VOCAB_SIZE = len(char2idx.items())
-BATCH_SIZE = 4
-MAX_LEN = 15
-EPOCHS = 15
+def train_fn(features, labels, training=True, batch_size=16):
+    """An input function for training or evaluating"""
+    # Convert the inputs to a Dataset.
+    dataset = tf.data.Dataset.from_tensor_slices((dict(features), labels))
 
-model: tf.keras.Sequential = tf.keras.Sequential([
-    tf.keras.layers.Embedding(VOCAB_SIZE, 64),
-    tf.keras.layers.LSTM(64),
-    tf.keras.layers.Dropout(0.5),
-    tf.keras.layers.Dense(len(labels), activation='softmax')
-    ])
+    # Shuffle and repeat if you are in training mode.
+    if training:
+        dataset = dataset.shuffle(1000).repeat()
 
-model.summary()
+    return dataset.batch(batch_size)
 
-def encode_text(text):
-    # print(text)
-    tokens = keras.preprocessing.text.text_to_word_sequence(text)
-    # print(tokens)
-    tokens = [char2idx[word] if word in char2idx else -1 for word in tokens[0]]
-    # print(tokens)
-    return keras.utils.pad_sequences([tokens], MAX_LEN)[0]
+my_feature_columns = []
+for key in data.keys():
+    my_feature_columns.append(tf.feature_column.indicator_column(tf.feature_column.categorical_column_with_hash_bucket(key=key, hash_bucket_size=30)))
+    
+classifier = tf.estimator.DNNClassifier(
+    feature_columns=my_feature_columns,
+    # Two hidden layers of 30 and 10 nodes respectively.
+    hidden_units=[30, 10],
+    # The model must choose between 3 classes.
+    n_classes=len(set(words)))
 
 
-def decode_integers(integers):
-    PAD = -1
-    text = ""
-    for num in integers:
-      if num != PAD:
-        text += idx2char[num]
+classifier.train(
+    input_fn=lambda: train_fn(data, labels, training=True),
+    steps=10000)
 
-    return text[:-1]
+eval_result = classifier.evaluate(
+    input_fn=lambda: train_fn(test, test_labels, training=False))
 
-def encode_2d(ndarray: np.ndarray):
-    l=[]
-    for i in ndarray:
-        (encode_text("".join(i)))
-        l.append(encode_text("".join(i)))
-    return keras.utils.pad_sequences(np.array(l, dtype=np.int16), MAX_LEN)
+print('\nTest set accuracy: {accuracy:0.3f}\n'.format(**eval_result))
 
-def encode_1d(ndarray: np.ndarray):
-    l=[]
-    for i in ndarray:
-        l.append(encode_text(i))
-    return keras.utils.pad_sequences(np.array(l, dtype=np.int16), MAX_LEN)
+def input_fn(features, batch_size=256):
+    """An input function for prediction."""
+    # Convert the inputs to a Dataset without labels.
+    return tf.data.Dataset.from_tensor_slices(dict(features)).batch(batch_size)
 
-data: np.ndarray = encode_2d(data)
-test: np.ndarray = encode_2d(test)
 
-MAX_LEN=len(dat[0])
-labels = encode_2d(labels)
+predict_x = {
+    'obfuscated': ["lo_es", 'fl_s']
+}
 
-model.compile(loss="binary_crossentropy",optimizer="adamax",metrics=[tf.keras.metrics.BinaryAccuracy()], jit_compile=True)
-history = model.fit(data, labels, epochs=EPOCHS)
 
-model.save('./wordle_5.h5')
+predictions = classifier.predict(
+    input_fn=lambda: input_fn(predict_x), predict_keys='obfuscated')
 
-test_labels = encode_2d(test_labels)
-MAX_LEN=15
 
-results = model.evaluate(test, test_labels)
-test_arr = encode_2d(np.array([["_ty_e"]]))
 
-def largest(arr: np.ndarray, num: int=3):
-    return np.array([i[0] for i in sorted(enumerate(arr), key=lambda x: x[1], reverse=True)[0:num]])
+for pred_dict in predictions:
+    class_id = pred_dict['class_ids'][0]
+    print(pred_dict['class_ids'])
+    probability = pred_dict['probabilities'][class_id]
 
-def predict():
-  result = model.predict(test_arr)
-  print(largest(result, 5))
-  for i in largest(result, 3):
-      print(words[i])
-
-predict()
-
-# test_arr = encode_2d(np.array([["hel"]]))
-
-# predict()
-
-# test_arr = np.array([encode_text("hel")])
-
-# predict()
+    print('Prediction is "{}" ({:.1f}%)'.format(
+        words[class_id], 100 * probability))
