@@ -23,13 +23,13 @@ idx2char = {v: i for i,v in char2idx.items()}
 
 VOCAB_SIZE = len(char2idx.items())
 BATCH_SIZE = 4
-MAX_LEN = 250
-EPOCHS = 10
+MAX_LEN = 15
+EPOCHS = 15
 
 model: tf.keras.Sequential = tf.keras.Sequential([
     tf.keras.layers.Embedding(VOCAB_SIZE, 64),
     tf.keras.layers.LSTM(64),
-    tf.keras.layers.Dropout(0.9),
+    tf.keras.layers.Dropout(0.5),
     tf.keras.layers.Dense(len(labels), activation='softmax')
     ])
 
@@ -58,37 +58,38 @@ def encode_2d(ndarray: np.ndarray):
     for i in ndarray:
         (encode_text("".join(i)))
         l.append(encode_text("".join(i)))
-    return keras.utils.pad_sequences(np.array(l), MAX_LEN)
+    return keras.utils.pad_sequences(np.array(l, dtype=np.int16), MAX_LEN)
 
 def encode_1d(ndarray: np.ndarray):
     l=[]
     for i in ndarray:
         l.append(encode_text(i))
-    return keras.utils.pad_sequences(np.array(l), MAX_LEN)
+    return keras.utils.pad_sequences(np.array(l, dtype=np.int16), MAX_LEN)
 
 data: np.ndarray = encode_2d(data)
 test: np.ndarray = encode_2d(test)
 
-MAX_LEN=len(words)
+MAX_LEN=len(dat[0])
 labels = encode_2d(labels)
 
-model.compile(loss="binary_crossentropy",optimizer="nadam",metrics=['accuracy'])
+model.compile(loss="binary_crossentropy",optimizer="adamax",metrics=[tf.keras.metrics.BinaryAccuracy()], jit_compile=True)
 history = model.fit(data, labels, epochs=EPOCHS)
 
-model.save('./wordle.h5')
+model.save('./wordle_5.h5')
 
 test_labels = encode_2d(test_labels)
-MAX_LEN=250
+MAX_LEN=15
 
 results = model.evaluate(test, test_labels)
-test_arr = encode_2d(np.array([["low_s"]]))
+test_arr = encode_2d(np.array([["_ty_e"]]))
 
 def largest(arr: np.ndarray, num: int=3):
-    return np.array([i[0] for i in sorted(enumerate(arr), key=lambda x: x[1], reverse=True)[:num]])
+    return np.array([i[0] for i in sorted(enumerate(arr), key=lambda x: x[1], reverse=True)[0:num]])
 
 def predict():
   result = model.predict(test_arr)
-  for i in largest(result):
+  print(largest(result, 5))
+  for i in largest(result, 3):
       print(words[i])
 
 predict()
