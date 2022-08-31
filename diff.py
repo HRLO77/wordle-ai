@@ -44,7 +44,7 @@ def is_likely(word: str):
             in_order.append(i == similar_words[c])
             c+=1
     if len(similar_words) > 0:
-        return (len(similar_words) >= 3) and not(any(i in invalid for i in word)) and ((sum(in_order) / len(similar_words)) > 0.45)
+        return (len(similar_words) >= 3) and not(any(i in invalid for i in word)) or ((sum(in_order) / len(similar_words)) > 0.45)
     else:
         return (len(similar_words) >= 3) and not(any(i in invalid for i in word))
     

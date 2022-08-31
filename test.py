@@ -11,7 +11,7 @@ s1 = []
 s2 = []
 empty = []
 for word in words:
-    for i in range(8):
+    for i in range(10):
         empty = [*word]
         def add():
             global empty
