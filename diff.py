@@ -52,7 +52,7 @@ def score(word: str):
 
 c=1
 print('Finding matches...')
-out = sorted(((score(i), i) for i in remove_dupes(difflib.get_close_matches(inputed, data, n=possibilities, cutoff=0.7))[:100]), key=lambda x: x[0], reverse=True)
+out = sorted(((score(i), i) for i in remove_dupes(difflib.get_close_matches(inputed, data, n=possibilities, cutoff=0.8))[:100]), key=lambda x: x[0], reverse=True)
 print('Done!')
 for i,v in out:
     if is_likely(v):
