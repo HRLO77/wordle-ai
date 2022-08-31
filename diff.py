@@ -19,7 +19,7 @@ word_dict = {i:idx_dict[v] for i,v in zip(data, labels)}
 
 inputed = input('Enter your word: ')
 invalid = set(input('Enter invalid characters (i.e hgfav): '))
-print(invalid)
+displaced = list(input('Enter displaced charcters (i.e hgfav): '))
 
 def remove_dupes(iterable: list):
     c=0
@@ -43,8 +43,14 @@ def is_likely(word: str):
         if not c > len(similar_words)-1:
             in_order.append(i == similar_words[c])
             c+=1
+    in_place = []
+    for i in set(displaced):
+        if displaced.count(i) >= word.count(i):
+            in_place.append(True)
+        else:
+            in_place.append(False)
     if len(similar_words) > 0:
-        return (len(similar_words) >= 3) and not(any(i in invalid for i in word)) and ((sum(in_order) / len(similar_words)) > 0.45)
+        return (len(similar_words) >= 3) and not(any(i in invalid for i in word)) and ((sum(in_order) / len(similar_words)) > 0.45) and sum(in_place) == len(in_place)
     else:
         return (len(similar_words) >= 3) and not(any(i in invalid for i in word))
     
@@ -62,15 +68,21 @@ def score(word: str):
         if not c > len(similar_words)-1:
             in_order.append(i == similar_words[c])
             c+=1
+    in_place = []
+    for i in set(displaced):
+        if displaced.count(i) >= word.count(i):
+            in_place.append(True)
+        else:
+            in_place.append(False)
     if len(similar_words) > 0:
-        return (len(similar_words) / 5) + (sum(in_order) / len(similar_words))
+        return (len(similar_words) / 5) + (sum(in_order) / len(similar_words)) + (sum(in_place) / len(displaced))
     else:
         return (len(similar_words) / 5)
 
 
 c=1
 print('Finding matches...')
-out = sorted(((score(word_dict[i]), i) for i in remove_dupes(difflib.get_close_matches(inputed, data, n=possibilities, cutoff=0.1))[:100]), key=lambda x: x[0], reverse=True)
+out = sorted(((score(word_dict[i]), i) for i in remove_dupes(difflib.get_close_matches(inputed, data, n=possibilities, cutoff=0.8))[:100]), key=lambda x: x[0], reverse=True)
 print('Done!')
 remade = []
 to_add = []
