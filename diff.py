@@ -37,7 +37,17 @@ def is_likely(word: str):
         if i == inputed[c]:
             similar_words.append(i)
         c+=1
-    return (len(similar_words) >= 3) and not(any(i in invalid for i in word))
+    in_order = []
+    c=0
+    for i in inputed:
+        if not c > len(similar_words)-1:
+            in_order.append(i == similar_words[c])
+            c+=1
+    if len(similar_words) > 0:
+        return (len(similar_words) >= 3) and not(any(i in invalid for i in word)) and ((sum(in_order) / len(similar_words)) > 0.45)
+    else:
+        return (len(similar_words) >= 3) and not(any(i in invalid for i in word))
+    
     
 def score(word: str):
     similar_words = []
@@ -52,17 +62,23 @@ def score(word: str):
         if not c > len(similar_words)-1:
             in_order.append(i == similar_words[c])
             c+=1
-    return (len(similar_words) / 5) + (sum(in_order) / 5)
+    if len(similar_words) > 0:
+        return (len(similar_words) / 5) + (sum(in_order) / len(similar_words))
+    else:
+        return (len(similar_words) / 5)
 
 
 c=1
 print('Finding matches...')
 out = sorted(((score(word_dict[i]), i) for i in remove_dupes(difflib.get_close_matches(inputed, data, n=possibilities, cutoff=0.8))[:100]), key=lambda x: x[0], reverse=True)
 print('Done!')
+remade = []
+to_add = []
 for i,v in out:
     if is_likely(word_dict[v]):
-        print(f'{c}. {word_dict[v]} - score: {i}')
+        remade.append(f'{word_dict[v]} - score: {i}')
         c+=1
     elif is_likely(v):
-        print(f'{c}. {word_dict[v]} - score: {i} (unsure)')
+        to_add.append(f'{word_dict[v]} - score: {i} (unsure)')
         c+=1
+print(*remade+to_add,sep='\n')
