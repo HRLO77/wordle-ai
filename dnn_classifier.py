@@ -17,7 +17,7 @@ test.head(), data.head()
 char2idx = {v:i for i,v in enumerate(set(' '.join(words)))}
 idx2char = {v:i for i,v in char2idx.items()}
 
-def train_fn(features, labels, training=True, batch_size=16):
+def train_fn(features, labels, training=True, batch_size=1):
     """An input function for training or evaluating"""
     # Convert the inputs to a Dataset.
     dataset = tf.data.Dataset.from_tensor_slices((dict(features), labels))
@@ -49,21 +49,21 @@ eval_result = classifier.evaluate(
 
 print('\nTest set accuracy: {accuracy:0.3f}\n'.format(**eval_result))
 
-def input_fn(features, batch_size=256):
+def input_fn(features, batch_size=1):
     """An input function for prediction."""
     # Convert the inputs to a Dataset without labels.
     return tf.data.Dataset.from_tensor_slices(dict(features)).batch(batch_size)
 
 
 predict_x = {
-    'obfuscated': ["_o_es", 'fl_s']
+    'obfuscated': ["lo_e_", 'fle_s']
 }
 
 
 predictions = classifier.predict(
     input_fn=lambda: input_fn(predict_x))
 
-
+print(classifier.predict(input_fn=lambda: input_fn(predict_x))[0]['class_ids'][0])
 
 for pred_dict in predictions:
     class_id = pred_dict['class_ids'][0]
@@ -72,3 +72,6 @@ for pred_dict in predictions:
 
     print('Prediction is "{}" ({:.1f}%)'.format(
         words[class_id], 100 * probability))
+    
+while True:
+    exec(input(), globals(), locals())
