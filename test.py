@@ -11,7 +11,7 @@ s1 = []
 s2 = []
 empty = []
 for word in words:
-    for i in range(5):
+    for i in range(8):
         empty = [*word]
         def add():
             global empty
@@ -32,4 +32,5 @@ with open('./wordle.pickle', 'wb') as f:
     
 
 writer = csv.writer(open('./wordle.csv', 'w'))
+writer.writerow(('obfuscated','labels'))
 writer.writerows((zip(s1, s2)))
