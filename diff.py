@@ -4,7 +4,6 @@ import difflib
 
 print('Loading words...')
 words = [word.strip() for word in open('./wordle.txt').readlines()]
-print(words[12256])
 possibilities=len(words)
 print('Indexing...')
 idx_dict = {i:v for i,v in enumerate(words)}
