@@ -19,6 +19,7 @@ word_dict = {i:idx_dict[v] for i,v in zip(data, labels)}
 
 inputed = input('Enter your word: ')
 invalid = set(input('Enter invalid characters (i.e hgfav): '))
+print(invalid)
 
 def remove_dupes(iterable: list):
     c=0
@@ -33,12 +34,10 @@ def is_likely(word: str):
     similar_words = []
     c=0
     for i in word:
-        if i in invalid:
-            return False
         if i == inputed[c]:
             similar_words.append(i)
         c+=1
-    return len(similar_words) > 3
+    return (len(similar_words) >= 3) and not(any(i in invalid for i in word))
     
 def score(word: str):
     similar_words = []
@@ -47,14 +46,23 @@ def score(word: str):
         if i == inputed[c]:
             similar_words.append(i)
         c+=1
-    return (len(similar_words) / 5)
+    in_order = []
+    c=0
+    for i in inputed:
+        if not c > len(similar_words)-1:
+            in_order.append(i == similar_words[c])
+            c+=1
+    return (len(similar_words) / 5) + (sum(in_order) / 5)
 
 
 c=1
 print('Finding matches...')
-out = sorted(((score(i), i) for i in remove_dupes(difflib.get_close_matches(inputed, data, n=possibilities, cutoff=0.8))[:100]), key=lambda x: x[0], reverse=True)
+out = sorted(((score(word_dict[i]), i) for i in remove_dupes(difflib.get_close_matches(inputed, data, n=possibilities, cutoff=0.8))[:100]), key=lambda x: x[0], reverse=True)
 print('Done!')
 for i,v in out:
-    if is_likely(v):
+    if is_likely(word_dict[v]):
         print(f'{c}. {word_dict[v]} - score: {i}')
+        c+=1
+    elif is_likely(v):
+        print(f'{c}. {word_dict[v]} - score: {i} (unsure)')
         c+=1
