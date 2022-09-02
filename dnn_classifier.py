@@ -54,6 +54,7 @@ model.compile(optimizer='nadam', loss=tf.keras.losses.SparseCategoricalCrossentr
 
 model.summary()
 
+
 model.fit(data, labels, epochs=3)
 
 model.save('./model.h5')
@@ -64,7 +65,7 @@ print(history)
 
 
 def predict(arr: np.ndarray):
-    out: np.ndarray = model.predict(arr).flatten()
+    out: np.ndarray = model.predict(encode(arr.flatten())).flatten()
     m = (out.min(), out.min())
 
     c=0
@@ -74,4 +75,4 @@ def predict(arr: np.ndarray):
         c+=1
 
     print(idx_dict[m[1]], m[0])
-    return m        
+    return m
