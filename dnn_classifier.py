@@ -40,18 +40,15 @@ model = keras.Sequential([
   tf.keras.layers.Dense(64*4*4, activation='relu'),
   tf.keras.layers.Dense(64*4, activation='relu'),
   tf.keras.layers.Dense(64, activation='relu'),
-  tf.keras.layers.Dense(len(set(labels)), activation='softmax')
   ])
 
 model.compile(optimizer='nadam', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
 
 model.summary()
 
-model.load_weights('./model.h5') 
-
 model.fit(data, labels, epochs=7)
 
-model.save('./model1.h5') 
+model.save('./model.h5') 
 history = model.evaluate(test, test_labels)
 
 def predict(arr: np.ndarray):
