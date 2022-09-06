@@ -1,5 +1,3 @@
-import numpy as np
-import pickle as pk
 import random
 import csv
 
@@ -26,9 +24,6 @@ for word in words:
         add()
         for i in range(1):
             empty[random.randint(0, len(empty)-1)] = '_'
-
-with open('./wordle.pickle', 'wb') as f:
-    pk.dump(np.array([s1, s2]), f)
     
 
 writer = csv.writer(open('./wordle.csv', 'w'))

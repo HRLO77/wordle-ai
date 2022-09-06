@@ -2,38 +2,52 @@
 Trying to make something that solves wordles.
 
 # dnn_classifier.py
-To load up the weights file, create a keras.Sequential model such as
+Before anything else, decompress all the compressed .h5 if not done so far (must be done locally). Run the `decompress` function to decompress the .h5 files, and `compress` if you want to compress all the .h5 files again. 
+
 ```py
-model = keras.Sequential([
-  tf.keras.layers.Flatten(input_shape=(5,)),
-  tf.keras.layers.Dense(128, activation='relu'),
-  tf.keras.layers.Dense(256, activation='relu'),
-  tf.keras.layers.Dense(512, activation='relu'),
-  tf.keras.layers.Dense(len(set(labels)), activation='softmax')
-  ])
+# dnn_classifier.py
 
-model.compile(optimizer='nadam', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
+import gzip
+import glob
 
-model.load_weights('./smaller_model.h5')
+def compress():
+    '''Compress data in all .h5 files'''
+    for i in glob.glob('./*.h5'):
+        l = gzip.compress(open(i, 'rb').read(),compresslevel=9)
+        open(i, 'wb').write(l)
+        
+def decompress():
+    '''Decompress data in all .h5 files'''
+    for i in glob.glob('./*.h5'):
+        l = gzip.decompress(open(i, 'rb').read())
+        open(i, 'wb').write(l)
 ```
-For the smaller model, otherwise:
+To load up the weights file, use the `build_model` function to build a model and load up weights:
+
 ```py
-model = keras.Sequential([
-  tf.keras.layers.Flatten(input_shape=(5,)),
-  tf.keras.layers.Dense(256, activation='relu'),
-  tf.keras.layers.Dense(512, activation='relu'),
-  tf.keras.layers.Dense(1024, activation='relu'),
-  tf.keras.layers.Dense(len(set(labels)), activation='softmax')
-  ])
+# dnn_classifier.py
 
-model.compile(optimizer='nadam', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
-
-model.load_weights('./larger_model.h5')
+def build_model(mode: int=0):
+    '''Returns a keras.Sequential model with the loaded weights.'''
+    mode+=1
+    model = keras.Sequential([
+    tf.keras.layers.Flatten(input_shape=(5,)),
+    tf.keras.layers.Dense(128*mode, activation='relu'),
+    tf.keras.layers.Dense(256*mode, activation='relu'),
+    tf.keras.layers.Dense(512*mode, activation='relu'),
+    tf.keras.layers.Dense(len(set(labels)), activation='softmax')
+    ])
+    model.compile(optimizer='nadam', loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'], jit_compile=True)
+    model.summary()
+    model.load_weights('./smaller_model.h5' if mode==1 else './larger_model.h5')
+    return model
 ```
-To load the larger model.
+Run `model = build_model(0)` to load the smaller model, and `model = build_model(1)`to load the larger model.
 
-Encode data with:
+Encode data with the `encode` function (takes a 1d np.ndarray of strings):
 ```py
+# dnn_classifier.py
+
 data = pd.read_csv('./wordle.csv').to_numpy().flatten()
 
 t = sorted(set(''.join(data)))
@@ -50,12 +64,17 @@ def encode(array: np.ndarray):
 
 del data # remove the extra data
 ```
-And predict using (returns a tuple of strings and floats, sorted from greatest to least based on the probability):
+And predict using the `predict` function. (returns a tuple of strings and floats, sorted from greatest to least based on the probability):
 ```py
+# dnn_classifier.py
+
 def predict(arr: np.ndarray):
     out = tuple(model.predict(encode(arr.flatten())).flatten())
     out = ((words[i],v) for i,v in enumerate(out))
     return sorted(out, key=lambda x: x[1], reverse=True)
 ```
+# predictions.py
+`predictions.py` is an example file of how to encode data, decompress weights files and make predictions.
+
 # diff.py
 Run `python diff.py`and follow instructions on the screen, all the work is done automatically, no encoding or training necessary!
