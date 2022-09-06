@@ -42,7 +42,7 @@ def build_model(mode: int=0):
     model.load_weights('./smaller_model.h5' if mode==1 else './larger_model.h5')
     return model
 ```
-Run `model = build_model(0)` to load the smaller model, and `model = build_model(1)`to load the larger model.
+Run `model = build_model(0)` to load the smaller model, or `model = build_model(1)`to load the larger model.
 
 Encode data with the `encode` function (takes a 1d np.ndarray of strings):
 ```py
