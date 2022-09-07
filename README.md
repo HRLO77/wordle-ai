@@ -1,8 +1,11 @@
 # wordle-ai
 Trying to make something that solves wordles.
+# requirements
+Install dependencies with `python -m pip install -r requirements.txt`.
+Recommended to have at least 2 free GB ram, 2 core cpu and 1 gb free storage
 
 # dnn_classifier.py
-Before anything else, decompress all the compressed .h5 files if they are not decompressed (must be done locally). Run the `decompress` function to decompress the .h5 files, and `compress` if you want to compress all the .h5 files again. 
+After cloning this repository locally, decompress all the compressed .h5 files. Run the `decompress` function to decompress the .h5 files, and `compress` if you want to compress all the .h5 files again. 
 
 ```py
 # dnn_classifier.py
