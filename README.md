@@ -2,7 +2,7 @@
 Trying to make something that solves wordles.
 
 # dnn_classifier.py
-Before anything else, decompress all the compressed .h5 if not done so far (must be done locally). Run the `decompress` function to decompress the .h5 files, and `compress` if you want to compress all the .h5 files again. 
+Before anything else, decompress all the compressed .h5 files if they are not decompressed (must be done locally). Run the `decompress` function to decompress the .h5 files, and `compress` if you want to compress all the .h5 files again. 
 
 ```py
 # dnn_classifier.py
