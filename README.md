@@ -1,6 +1,7 @@
 # wordle-ai
 Trying to make something that solves wordles.
-# requirements
+
+# requirements.txt
 Install dependencies with `python -m pip install -r requirements.txt`.
 Recommended to have at least 2 free GB ram, 2 core cpu and 1 gb free storage
 
