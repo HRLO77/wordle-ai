@@ -68,7 +68,7 @@ def encode(array: np.ndarray):
 
 del data # remove the extra data
 ```
-And predict using the `predict` function. (returns a tuple of strings and floats, sorted from greatest to least based on the probability):
+And predict using the `predict` function. It takes a 1d np.ndarray of strings, five characters in length (returns a tuple of strings and floats, sorted from greatest to least based on the probability):
 ```py
 # dnn_classifier.py
 
