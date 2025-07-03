@@ -24,7 +24,7 @@ inputed = input('Enter your word (leave unsure chars _ e.g "_oll_"): ').lower().
 invalid = set(input('Enter invalid characters (i.e hgfav): ').lower().strip())
 displaced = tuple(input('Enter displaced charcters (i.e hgfav): ').lower().strip())
 not_there: list[tuple[str, int]] = []
-while displaced!='':
+while displaced!=('',):
     comb = input('Enter combinations where displaced letters ARE NOT, diregarding other letters (e.g t____, __t__, _q___). type 11111 to exit: ').lower().strip()
     if comb=='11111':
         break
