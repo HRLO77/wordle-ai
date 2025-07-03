@@ -24,7 +24,7 @@ inputed = input('Enter your word (leave unsure chars _ e.g "_oll_"): ').lower().
 invalid = set(input('Enter invalid characters (i.e hgfav): ').lower().strip())
 displaced = tuple(input('Enter displaced charcters (i.e hgfav): ').lower().strip())
 not_there: list[tuple[str, int]] = []
-while True:
+while displaced!='':
     comb = input('Enter combinations where displaced letters ARE NOT, diregarding other letters (e.g t____, __t__, _q___). type 11111 to exit: ').lower().strip()
     if comb=='11111':
         break
@@ -40,7 +40,7 @@ def check(word: str) -> tuple[str]:
     possibles = []
     for possible in words:
         works=True
-        for i in prange(5):  # 5 letters
+        for i in range(5):  # 5 letters
             if word[i]=='_':
                 if possible[i] in invalid:
                     works = False
@@ -54,7 +54,7 @@ def check(word: str) -> tuple[str]:
         already_displaced = set()
         if len(displaced)!=0:
             for char in displaced:
-                for j in prange(5):
+                for j in range(5):
                     
                     if word[j]=='_' and possible[j]==char and (not (char in already_displaced)) and not_there.count((char, j))==0:
                         met_displaced += 1
