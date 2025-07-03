@@ -1,22 +1,23 @@
-import pandas as pd
-import numpy as np
-import difflib
-import numba
-import os
-os.environ['NUMBA_OPT'] = 'max'
+# import pandas as pd
+# import numpy as np
+# import difflib
+# import numba
+# import os
+# prange = numba.prange
+# os.environ['NUMBA_OPT'] = 'max'
 print('Loading words...')
 words = [word.strip() for word in open('./wordle.txt').readlines()]
 # possibilities=len(words)
-print('Indexing...')
-idx_dict = {i:v for i,v in enumerate(words)}
+# print('Indexing...')
+# idx_dict = {i:v for i,v in enumerate(words)}
 
-print('Loading dataset...')
-data = pd.read_csv('./wordle.csv')
-print('Numpy-ifying...')
-labels = np.array([int(i) for i in data.pop('labels').to_numpy()], dtype=np.int16).flatten()
-data = data.to_numpy().flatten()
-print('Labelling data...')
-word_dict = {i:idx_dict[v] for i,v in zip(data, labels)}
+# print('Loading dataset...')
+# data = pd.read_csv('./wordle.csv')
+# print('Numpy-ifying...')
+# labels = np.array([int(i) for i in data.pop('labels').to_numpy()], dtype=np.int16).flatten()
+# data = data.to_numpy().flatten()
+# print('Labelling data...')
+# word_dict = {i:idx_dict[v] for i,v in zip(data, labels)}
 
 
 inputed = input('Enter your word (leave unsure chars _ e.g "_oll_"): ').lower().strip()
@@ -34,11 +35,12 @@ while True:
         if comb[i]!='_':
             break
     not_there.append((comb[i], i))
+# @numba.jit(numba.types.Tuple((numba.types.string,))(numba.types.string), boundscheck=False,parallel=True, fastmath=True)
 def check(word: str) -> tuple[str]:
     possibles = []
     for possible in words:
         works=True
-        for i in range(5):  # 5 letters
+        for i in prange(5):  # 5 letters
             if word[i]=='_':
                 if possible[i] in invalid:
                     works = False
@@ -52,7 +54,7 @@ def check(word: str) -> tuple[str]:
         already_displaced = set()
         if len(displaced)!=0:
             for char in displaced:
-                for j in range(5):
+                for j in prange(5):
                     
                     if word[j]=='_' and possible[j]==char and (not (char in already_displaced)) and not_there.count((char, j))==0:
                         met_displaced += 1
@@ -61,6 +63,7 @@ def check(word: str) -> tuple[str]:
             continue
         possibles.append(possible)
     return tuple(possibles)
+
 print(check(inputed))
 # def remove_dupes(iterable: list):
 #     c=0
